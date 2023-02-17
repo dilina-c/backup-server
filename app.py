@@ -5,7 +5,7 @@ import joblib
 import firebase_admin
 from firebase_admin import credentials,firestore,storage
 from datetime import datetime, timedelta
-import os
+import os,requests
 
 app = Flask(__name__)
 
@@ -14,6 +14,8 @@ firebase_admin.initialize_app(cred,{'storageBucket' : "smart-power-adapter-3a443
 db = firestore.client()
 devices_col_ref = db.collection(u'devices')
 bucket = storage.bucket()
+
+url = 'https://56ea37ee-32d1-40c1-b422-721652d7d972.mock.pstmn.io/connectUI' 
 
 @app.route('/predict',methods=  ['POST'])
 def makePrediction():
@@ -33,8 +35,15 @@ def makePrediction():
    model = joblib.load(fileName)
    prediction = model.predict(predictValue)
    #os.remove(fileName)
-   return jsonify({"response":prediction.tolist(),"requested_value":predictValue})
+   UIJsonObject ={
+      "device_id": json_deviceid,
+      "requested_value": predictValue,
+      "response": prediction.tolist(),
+      "data reading": predictData
+      }
+   response=requests.post(url, json = UIJsonObject)
+   print(response.text)
+   return jsonify({"requested device id":json_deviceid,"response":prediction.tolist(),"requested_value":predictValue})
   
-
 if __name__ == '__main__':
    app.run(port=8080, debug=False)
