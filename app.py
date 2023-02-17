@@ -1,15 +1,10 @@
 from flask import Flask
 from flask import request, jsonify
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score  
 import joblib
 import firebase_admin
-from firebase_admin import credentials,firestore
+from firebase_admin import credentials,firestore,storage
 from datetime import datetime, timedelta
-import firebase_admin
-from firebase_admin import credentials ,storage
 import os
 
 app = Flask(__name__)
