@@ -1,6 +1,6 @@
 from flask import Flask
 from flask import request, jsonify
-import pandas as pd
+#import pandas as pd
 import joblib
 import firebase_admin
 from firebase_admin import credentials,firestore,storage
@@ -25,7 +25,7 @@ def makePrediction():
    predictData=json_data['data reading']
 
    day_of_week = datetime.fromtimestamp(predictData["time"]/1000).weekday()
-   time_of_day = datetime.fromtimestamp(predictData["time"]/1000).strftime("%I") 
+   time_of_day = datetime.fromtimestamp(predictData["time"]/1000).strftime("%I")
 
    predictValue = [[day_of_week,time_of_day]]
    json_deviceid = json_data['device_id'] 
@@ -35,14 +35,15 @@ def makePrediction():
    model = joblib.load(fileName)
    prediction = model.predict(predictValue)
    #os.remove(fileName)
-   UIJsonObject ={
-      "device_id": json_deviceid,
-      "requested_value": predictValue,
-      "response": prediction.tolist(),
-      "data reading": predictData
+   if prediction == False:
+      UIJsonObject ={
+         "device_id": json_deviceid,
+         "requested_value": predictValue,
+         "response": prediction.tolist(),
+         "data reading": predictData
       }
-   response=requests.post(url, json = UIJsonObject)
-   print(response.text)
+      response=requests.post(url, json = UIJsonObject)
+      print(response.text)
    return jsonify({"requested device id":json_deviceid,"response":prediction.tolist(),"requested_value":predictValue})
   
 if __name__ == '__main__':
