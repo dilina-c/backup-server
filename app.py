@@ -22,7 +22,7 @@ def makePrediction():
    predictValue = [[]]
 
    json_data = request.get_json()
-   predictData=json_data['data reading']
+   predictData=json_data['data_reading']
 
    day_of_week = datetime.fromtimestamp(predictData["time"]/1000).weekday()
    time_of_day = datetime.fromtimestamp(predictData["time"]/1000).strftime("%I")
