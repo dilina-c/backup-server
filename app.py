@@ -29,9 +29,13 @@ def makePrediction():
 
    predictValue = [[day_of_week,time_of_day]]
    json_deviceid = json_data['device_id'] 
-   fileName = json_deviceid +'.joblib'
-   storage_blob = bucket.blob(fileName)
-   storage_blob.download_to_filename(fileName)
+   fileName = json_deviceid +'_anomaly.joblib'
+   try:
+      storage_blob = bucket.blob(fileName)
+      storage_blob.download_to_filename(fileName)
+   except Exception as e: 
+        print(e)
+        return 'model file not found'   
    model = joblib.load(fileName)
    prediction = model.predict(predictValue)
    #os.remove(fileName)
@@ -45,6 +49,30 @@ def makePrediction():
       response=requests.post(url, json = UIJsonObject)
       print(response.text)
    return jsonify({"requested device id":json_deviceid,"response":prediction.tolist(),"requested_value":predictValue})
-  
+
+@app.route('/cforcast',methods=  ['POST','GET'])
+def makeCForcast():
+   json_data = request.get_json()
+   json_deviceid = json_data['device_id']
+   fileName = json_deviceid +'_power_consumption.joblib'
+   try:
+      storage_blob = bucket.blob(fileName)
+      storage_blob.download_to_filename(fileName)
+   except Exception as e: 
+        print(e)
+        return 'model file not found'
+   model = joblib.load(fileName)
+   power_output = {"device_id": json_deviceid, "data": {}}
+   datalog=power_output["data"]
+   for day in range(7):
+      if day not in datalog:
+         datalog[day] = []
+      for hour in range(24):
+         power = model.predict([[day, hour]])
+         datalog[day].append([power[0]])
+   #os.remove(fileName)
+   return power_output
+
+
 if __name__ == '__main__':
    app.run(port=8080, debug=False)
