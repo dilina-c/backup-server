@@ -61,3 +61,7 @@ The response will be a JSON object containing the device ID, the requested value
     ]
 }
 ```
+# collaborators
+* [@pksm9](https://github.com/pksm9)
+* [@nisitharanaweera](https://github.com/nisitharanaweera)
+* [@DTG-H](https://github.com/DTG-H)
