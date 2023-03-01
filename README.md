@@ -1,15 +1,67 @@
-# backup-server
+# Description
 
-This code defines a Flask web application with two endpoints: /predict and /train.
+This repository contains a Flask API that serves machine learning models for predicting power consumption of a device and detecting anomalies in the device readings. The API utilizes Firebase to store the machine learning models and provides endpoints for predicting power consumption and detecting anomalies in device readings.
 
-The /predict endpoint receives a JSON object(example- ```{"device_id": 
-"QEIZrUmZGUuzBqRnw0jZ","data reading": {"i"
-:0.9900436818128375,
-"time":
-1676362048419,
-"v":
-0.5681495890359043}}```) containing a data reading, which is used to predict whether a device is on or off. The data reading includes a timestamp and a device ID. The code converts the timestamp to the day of the week and time of day, and uses these as features for a trained machine learning model. The model predicts whether the device is on or off, and returns the prediction along with the original requested value as a JSON response.
+# Installation
 
-The /train endpoint trains a machine learning model for each device in a Firestore database. The code retrieves the last three months of readings for each device, converts the timestamps to day of the week and time of day, and uses these as features to train a random forest classifier. The trained model is saved to a file and uploaded to a Google Cloud Storage bucket.
-
-The code imports several Python packages, including Flask, pandas, scikit-learn, joblib, and firebase_admin. It uses Firebase Admin SDK to authenticate and interact with Firebase services, including Firestore and Cloud Storage.
+To run this Flask API, please follow the instructions below:
+1. Clone this repository
+```bash
+git clone <repository-url>
+```
+2. Navigate into the repository
+```bash
+cd <repository-name>
+```
+3. Install the required packages
+```
+pip install -r requirements.txt
+```
+4. [Set up Firebase credentials](https://firebase.google.com/docs/admin/setup#add-sdk) and download the json file and placing it in the root directory of the repository.
+5. Start the Flask API
+```
+python app.py
+```
+# Usage
+## Power Consumption Prediction
+To predict the power consumption of a device, send a POST request to the /cforcast endpoint with the device ID in the request body:
+```json
+{
+    "device_id": "your device id "
+}
+```
+The response will be a JSON object containing the device ID and a dictionary with the predicted power consumption for each hour of each day of the week:
+```json
+{"data":{"0":[[0.7487779683051776],[0.7487779683051776],[0.5005482412399646],[0.5005482412399646],[0.4921948659275354],[0.49229498246858727],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591]],"1":[[0.7487779683051776],[0.7487779683051776],[0.5005482412399646],[0.5005482412399646],[0.4921948659275354],[0.49229498246858727],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591]],"2":[[0.7487779683051776],[0.7487779683051776],[0.5005482412399646],[0.5005482412399646],[0.4921948659275354],[0.49229498246858727],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591],[0.4945098617401591]],"3":[[1.3959007353357729],[1.3959007353357729],[0.8682316315982567],[0.8682316315982567],[0.8304635850571641],[0.8305637015982161],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788],[0.832778580869788]],"4":[[1.3841842065022611],[1.3841842065022611],[0.8565151027647446],[0.8565151027647446],[0.8186081931150939],[0.8185694465475873],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159],[0.820784325819159]],"5":[[1.0337234086713951],[1.0337234086713951],[0.5060543049338797],[0.5060543049338797],[0.46582731709719316],[0.4653197525737444],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888],[0.469749511116888]],"6":[[0.9019937126139514],[0.9019937126139514],[0.37432460887643637],[0.37432460887643637],[0.3334460292620181],[0.3330388706838465],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017],[0.33746862922699017]]},"device_id":"your device id "}
+```
+## Anomaly Detection
+To detect anomalies in device readings, send a POST request to the /predict endpoint with the device ID and data reading in the request body
+```json
+{
+    "device_id": "your device id ",
+    "data_reading": {
+        "i": 0.9900436818128375,
+        "time": 1676362048419,
+        "v": 0.5681495890359043
+    }
+}
+```
+The response will be a JSON object containing the device ID, the requested value, the predicted response, and the data reading:
+```json
+{
+    "requested device id": "nodered_9612620c856b38f3",
+    "requested_value": [
+        [
+            1,
+            "08"
+        ]
+    ],
+    "response": [
+        true
+    ]
+}
+```
+# Collaborators
+* [@pksm9](https://github.com/pksm9)
+* [@nisitharanaweera](https://github.com/nisitharanaweera)
+* [@DTG-H](https://github.com/DTG-H)
