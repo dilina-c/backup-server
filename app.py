@@ -6,7 +6,7 @@ import firebase_admin
 from firebase_admin import credentials,firestore,storage
 from datetime import datetime, timedelta
 import os,requests
-
+import json
 app = Flask(__name__)
 
 cred = credentials.Certificate("smart-power-adapter-3a443-firebase-adminsdk-4gp49-a276da6c45.json")
@@ -15,7 +15,7 @@ db = firestore.client()
 devices_col_ref = db.collection(u'devices')
 bucket = storage.bucket()
 
-url = 'http://52c8-112-134-140-140.in.ngrok.io/create-anomaly' 
+url = 'http://www.smart-plug-uoc-colombo.site/create-anomaly' 
 
 @app.route('/predict',methods=  ['POST'])
 def makePrediction():
@@ -23,13 +23,20 @@ def makePrediction():
       predictValue = [[]]
 
       json_data = request.get_json()
+      json_deviceid = json_data['device_id']
+      #check if the device is registered
+      doc_ref = devices_col_ref.document(json_deviceid)  
+      doc = doc_ref.get()
+      if not doc.exists:
+         return 'device not registered'
+      
       predictData=json_data['data_reading']
 
       day_of_week = datetime.fromtimestamp(predictData["time"]/1000).weekday()
       time_of_day = datetime.fromtimestamp(predictData["time"]/1000).strftime("%I")
 
       predictValue = [[day_of_week,time_of_day]]
-      json_deviceid = json_data['device_id'] 
+       
       fileName = json_deviceid +'_anomaly.joblib'
       if not os.path.exists(fileName):
          try:
@@ -50,7 +57,7 @@ def makePrediction():
          }
          response=requests.post(url, json = UIJsonObject)
          print(response.text)
-      return jsonify({"requested device id":json_deviceid,"response":prediction.tolist(),"requested_value":predictValue})
+      return jsonify({"requested device id":json_deviceid,"response":bool(prediction[0]),"requested_value":predictValue})
    except Exception as e:
       print(e)
       return 'error'
@@ -60,6 +67,11 @@ def makeCForcast():
    try:
       json_data = request.get_json()
       json_deviceid = json_data['device_id']
+      #check if the device is registered
+      doc_ref = devices_col_ref.document(json_deviceid)  
+      doc = doc_ref.get()
+      if not doc.exists:
+         return 'device not registered'
       fileName = json_deviceid +'_power_consumption.joblib' 
       if not os.path.exists(fileName):
          try:
